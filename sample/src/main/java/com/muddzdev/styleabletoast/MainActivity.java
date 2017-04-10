@@ -6,7 +6,6 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Toast;
-
 import com.muddzdev.styleabletoastlibrary.StyleableToast;
 
 public class MainActivity extends AppCompatActivity {
@@ -18,12 +17,12 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-//        stBuilder = new StyleableToast
-//                .Builder(this, "Turn off fly mode")
-//                .withBackgroundColor(Color.RED)
-//                .withTextColor(Color.WHITE)
-//                .withBoldText()
-//                .build();
+        //        stBuilder = new StyleableToast
+        //                .Builder(this, "Turn off fly mode")
+        //                .withBackgroundColor(Color.RED)
+        //                .withTextColor(Color.WHITE)
+        //                .withBoldText()
+        //                .build();
 
     }
 
@@ -44,7 +43,7 @@ public class MainActivity extends AppCompatActivity {
 
             case R.id.button2:
 
-//                stBuilder.show();
+                //                stBuilder.show();
 
                 StyleableToast st = new StyleableToast(this, "Turn off fly mode", Toast.LENGTH_LONG);
                 st.setBackgroundColor(Color.parseColor("#865aff"));
@@ -77,19 +76,26 @@ public class MainActivity extends AppCompatActivity {
                 break;
 
             case R.id.button5:
-
-                StyleableToast.makeText(this, "Picture saved in gallery", Toast.LENGTH_LONG, R.style.StyleableToast).show();
-
+                st = new StyleableToast(this.getApplicationContext(), "Picture saved in gallery", Toast.LENGTH_LONG, R.style.StyleableToast);
+                st.show();
                 break;
 
             case R.id.button6:
-
                 st = new StyleableToast(this, "Wrong password/username", Toast.LENGTH_LONG);
                 st.setBackgroundColor(Color.parseColor("#2187c6"));
                 st.setBoldText();
                 st.setTextColor(Color.WHITE);
                 st.setCornerRadius(7);
                 st.show();
+                break;
+            case R.id.button7:
+                StyleableToast.makeText(this, "这是默认样式的Toast", Toast.LENGTH_SHORT).show();
+                break;
+            case R.id.button8:
+                StyleableToast.makeText(this, "增加了Icon", R.drawable.ic_airplanemode_inactive_black_24dp, Toast.LENGTH_LONG).show();
+                break;
+            case R.id.button9:
+                StyleableToast.makeText(this, "超长文本超长文本超长文本超长文本超长文本超长文本超长文本超长文本超长文本超长文本超长文本超长文本超长文本超长文本超长文本超长文本超长文本超长文本超长文本超长文本超长文本超长文本超长文本超长文本超长文本超长文本超长文本超长文本超长文本超长文本超长文本超长文本超长文本超长文本超长文本超长文本超长文本超长文本超长文本超长文本超长文本超长文本超长文本超长文本超长文本超长文本超长文本超长文本超长文本超长文本超长文本超长文本超长文本超长文本超长文本超长文本超长文本超长文本超长文本超长文本超长文本超长文本超长文本超长文本超长文本超长文本超长文本超长文本超长文本超长文本超长文本超长文本超长文本超长文本超长文本超长文本超长文本超长文本超长文本超长文本超长文本超长文本超长文本超长文本超长文本超长文本超长文本超长文本超长文本超长文本超长文本超长文本超长文本超长文本超长文本超长文本超长文本超长文本超长文本超长文本超长文本超长文本超长文本超长文本超长文本超长文本超长文本超长文本超长文本超长文本超长文本超长文本超长文本超长文本超长文本超长文本超长文本超长文本超长文本超长文本超长文本超长文本超长文本超长文本超长文本超长文本超长文本超长文本超长文本超长文本超长文本超长文本超长文本超长文本超长文本超长文本超长文本超长文本超长文本超长文本超长文本超长文本超长文本超长文本超长文本超长文本超长文本超长文本超长文本超长文本超长文本超长文本超长文本超长文本超长文本超长文本超长文本超长文本超长文本超长文本", R.mipmap.ic_launcher, Toast.LENGTH_LONG).show();
                 break;
         }
     }

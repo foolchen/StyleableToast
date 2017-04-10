@@ -45,6 +45,7 @@
         android:textStyle="bold" />
 
     <RelativeLayout
+        android:id="@+id/layout1"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_below="@id/button1"
@@ -90,6 +91,56 @@
             android:text="Toast 6"
             android:textColor="#fff"
             android:textStyle="bold" />
+
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/layout1"
+        android:layout_marginTop="16dp">
+
+
+        <Button
+            android:id="@+id/button7"
+            android:layout_width="wrap_content"
+            android:layout_height="48dp"
+            android:layout_alignParentLeft="true"
+            android:background="#ff5a5f"
+            android:fontFamily="sans-serif-condensed"
+            android:onClick="Toaster"
+            android:padding="5dp"
+            android:text="默认样式"
+            android:textColor="#fff"
+            android:textStyle="bold" />
+
+        <Button
+            android:id="@+id/button8"
+            android:layout_width="wrap_content"
+            android:layout_height="48dp"
+            android:layout_centerInParent="true"
+            android:background="#ff5a5f"
+            android:fontFamily="sans-serif-condensed"
+            android:onClick="Toaster"
+            android:padding="5dp"
+            android:text="增加了Icon"
+            android:textColor="#fff"
+            android:textStyle="bold" />
+
+        <Button
+            android:id="@+id/button9"
+            android:layout_width="wrap_content"
+            android:layout_height="48dp"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentRight="true"
+            android:background="#ff5a5f"
+            android:fontFamily="sans-serif-condensed"
+            android:onClick="Toaster"
+            android:padding="5dp"
+            android:text="超长文本"
+            android:textColor="#fff"
+            android:textStyle="bold" />
+
 
     </RelativeLayout>
 </RelativeLayout>

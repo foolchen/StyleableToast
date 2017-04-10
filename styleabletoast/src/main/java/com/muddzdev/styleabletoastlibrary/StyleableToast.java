@@ -5,14 +5,12 @@ import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Color;
 import android.graphics.Typeface;
+import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
 import android.os.Build;
-import android.support.annotation.ColorInt;
-import android.support.annotation.DrawableRes;
-import android.support.annotation.NonNull;
-import android.support.annotation.StringRes;
-import android.support.annotation.StyleRes;
+import android.support.annotation.*;
 import android.util.TypedValue;
+import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.Animation;
@@ -22,6 +20,9 @@ import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 
 import static com.muddzdev.styleabletoastlibrary.Utils.getTypedValueInDP;
 
@@ -55,8 +56,11 @@ public class StyleableToast implements OnToastFinished {
     private static final int DEFAULT_TEXT_SIZE = 16;
     private static final int DEFAULT_CORNER_RADIUS = 25;
     private static final int DEFAULT_HORIZONTAL_PADDING = 25;
-    private static final int DEFAULT_VERTICAL_PADDING = 11;
+    private static final int DEFAULT_VERTICAL_PADDING = 25;
     private static final int DEFAULT_ALPHA = 230;
+    private static final int DEFAULT_MIN_HEIGHT = 144;
+    private static final int DEFAULT_GRAVITY = Gravity.CENTER;
+    private static final int DEFAULT_OFFSET = 128;
     private static int MAX_ALPHA = 255;
 
     private final Context context;
@@ -65,10 +69,10 @@ public class StyleableToast implements OnToastFinished {
     private Toast toast;
 
     private float strokeWidth;
-    private int duration, style, alpha, drawable;
+    private int duration, style, alpha, drawable, width, minHeight, gravity;
     private int backgroundColor, textColor, strokeColor;
     private int cornerRadius = -1;
-    private boolean isBold,isAnimation;
+    private boolean isBold, isAnimation;
     private String toastMsg;
     private ToastDurationWatcher durationTracker;
 
@@ -78,20 +82,18 @@ public class StyleableToast implements OnToastFinished {
     }
 
 
-    public StyleableToast(Context context, String toastMsg, int duration) {
+    public StyleableToast(Context context, String toastMsg, @Duration int duration) {
         this.context = context.getApplicationContext();
         this.toastMsg = toastMsg;
         this.duration = duration;
-
-
+        this.style = R.style.DefaultStyleableToast;
     }
 
-    public StyleableToast(Context context, String toastMsg, int duration, @StyleRes int styleId) {
+    public StyleableToast(Context context, String toastMsg, @Duration int duration, @StyleRes int styleId) {
         this.context = context.getApplicationContext();
         this.toastMsg = toastMsg;
         this.duration = duration;
         this.style = styleId;
-
     }
 
     private StyleableToast(Builder builder) {
@@ -217,7 +219,7 @@ public class StyleableToast implements OnToastFinished {
         this.backgroundColor = backgroundColor;
     }
 
-    public void setDuration(int duration) {
+    public void setDuration(@Duration int duration) {
         this.duration = duration;
     }
 
@@ -248,6 +250,18 @@ public class StyleableToast implements OnToastFinished {
         this.drawable = drawable;
     }
 
+    public void setWidth(int width) {
+        this.width = width;
+    }
+
+    public void setMinHeight(int minHeight) {
+        this.minHeight = minHeight;
+    }
+
+    public void setGravity(int gravity) {
+        this.gravity = gravity;
+    }
+
 
     //Returns the relative layout containing: textview, icons, shape
     private View getToastLayout() {
@@ -260,13 +274,20 @@ public class StyleableToast implements OnToastFinished {
         RelativeLayout toastLayout = new RelativeLayout(context);
         toastLayout.setPadding(horizontalPadding, verticalPadding, horizontalPadding, verticalPadding);
         toastLayout.setBackground(getToastShape());
-        toastLayout.addView(getTextView());
+
+        //toastLayout.setGravity(Gravity.CENTER);
 
         if (drawable > 0) {
             toastLayout.addView(getIcon());
             toastLayout.setPadding(0, verticalPadding, 0, verticalPadding);
-
         }
+        toastLayout.addView(getTextView());
+
+        toastLayout.setLayoutParams(new ViewGroup.LayoutParams(getWidth(), ViewGroup.LayoutParams.WRAP_CONTENT));
+
+        /*if (minHeight != DEFAULT_MIN_HEIGHT) {
+            toastLayout.setMinimumHeight(getMinHeight());
+        }*/
 
         return toastLayout;
     }
@@ -282,15 +303,22 @@ public class StyleableToast implements OnToastFinished {
             //array entries must be alphabetic ordered
             int[] colorAttrs = {android.R.attr.colorBackground, android.R.attr.strokeColor};
             int[] floatAttrs = {android.R.attr.alpha, android.R.attr.strokeWidth};
-            int[] dimenAttrs = {android.R.attr.radius};
+            int[] dimenAttrs = {android.R.attr.radius, android.R.attr.layout_width, android.R.attr.minHeight};
+            int[] widthAndHeightAttrs = {android.R.attr.layout_width, android.R.attr.minHeight};
+            int[] gravityAttrs = {android.R.attr.gravity};
 
             TypedArray colors = context.obtainStyledAttributes(style, colorAttrs);
             TypedArray floats = context.obtainStyledAttributes(style, floatAttrs);
             TypedArray dimens = context.obtainStyledAttributes(style, dimenAttrs);
+            TypedArray gravity = context.obtainStyledAttributes(style, gravityAttrs);
+            TypedArray widthAndHeight = context.obtainStyledAttributes(style, widthAndHeightAttrs);
 
             backgroundColor = colors.getColor(0, DEFAULT_BACKGROUND);
             cornerRadius = (int) dimens.getDimension(0, DEFAULT_CORNER_RADIUS);
             alpha = (int) floats.getFloat(0, DEFAULT_ALPHA);
+            width = widthAndHeight.getDimensionPixelSize(0, ViewGroup.LayoutParams.WRAP_CONTENT);
+            minHeight = widthAndHeight.getDimensionPixelSize(1, DEFAULT_MIN_HEIGHT);
+            this.gravity = gravity.getInt(0, DEFAULT_GRAVITY);
 
             if (Build.VERSION.SDK_INT >= 21) {
                 strokeWidth = floats.getFloat(1, 0);
@@ -300,6 +328,8 @@ public class StyleableToast implements OnToastFinished {
             colors.recycle();
             floats.recycle();
             dimens.recycle();
+            gravity.recycle();
+            widthAndHeight.recycle();
         }
 
     }
@@ -358,16 +388,28 @@ public class StyleableToast implements OnToastFinished {
         textView.setTextSize(TypedValue.COMPLEX_UNIT_SP, DEFAULT_TEXT_SIZE);
         textView.setTextColor(getTextColor());
         textView.setTypeface(getTypeface());
-        textView.setMaxLines(2);
 
         if (drawable > 0) {
-
+            int iconWidth = 0;
+            ImageView icon = getIcon();
+            if (icon != null) {
+                Drawable drawable = icon.getDrawable();
+                if (drawable != null) {
+                    iconWidth = drawable.getIntrinsicWidth();
+                }
+            }
             //previous: 18x2  + 8
-            int leftPadding = (int) getTypedValueInDP(context, 18 * 2 + 5);
+            int leftPadding = iconWidth == 0 ? (int) getTypedValueInDP(context, 18 * 2 + 5) : (int) getTypedValueInDP(context, 5);
             int rightPadding = (int) getTypedValueInDP(context, 22);
 
             RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-            layoutParams.addRule(RelativeLayout.CENTER_IN_PARENT);
+            if (icon == null) {
+                layoutParams.addRule(RelativeLayout.CENTER_IN_PARENT);
+            } else {
+                layoutParams.addRule(RelativeLayout.RIGHT_OF, icon.getId());
+                layoutParams.addRule(RelativeLayout.CENTER_VERTICAL);
+            }
+
             textView.setLayoutParams(layoutParams);
 
             //Make space between icon and textview / textview and right edge of the toast
@@ -391,6 +433,8 @@ public class StyleableToast implements OnToastFinished {
 
 
     private void getImageViewStyleAttr() {
+        if (drawable != 0)
+            return;
         if (style > 0) {
             int[] drawableAttrSet = {android.R.attr.icon};
             TypedArray drawableId = context.obtainStyledAttributes(style, drawableAttrSet);
@@ -406,14 +450,14 @@ public class StyleableToast implements OnToastFinished {
 
             //previous 18:
             int marginLeft = (int) getTypedValueInDP(context, 15);
-            int maxHeightVal = (int) getTypedValueInDP(context, 20);
-            int maxWidthVal = (int) getTypedValueInDP(context, 20);
+            //int maxHeightVal = (int) getTypedValueInDP(context, 20);
+            //int maxWidthVal = (int) getTypedValueInDP(context, 20);
 
             ImageView imageView = new ImageView(context);
             imageView.setImageDrawable(context.getResources().getDrawable(drawable));
             imageView.setAnimation(getAnimation());
-            imageView.setMaxWidth(marginLeft + maxWidthVal);
-            imageView.setMaxHeight(maxHeightVal);
+            /*imageView.setMaxWidth(marginLeft + maxWidthVal);
+            imageView.setMaxHeight(maxHeightVal);*/
             imageView.setAdjustViewBounds(true);
 
 
@@ -426,6 +470,7 @@ public class StyleableToast implements OnToastFinished {
 
             layoutParams.addRule(RelativeLayout.CENTER_VERTICAL);
             imageView.setLayoutParams(layoutParams);
+            imageView.setId(R.id.toast_icon);
             return imageView;
         }
         return null;
@@ -466,6 +511,18 @@ public class StyleableToast implements OnToastFinished {
 
     }
 
+    private int getWidth() {
+        return width;
+    }
+
+    private int getMinHeight() {
+        return minHeight;
+    }
+
+    private int getGravity() {
+        return gravity;
+    }
+
 
     private Typeface getTypeface() {
 
@@ -492,10 +549,12 @@ public class StyleableToast implements OnToastFinished {
 
 
     public void show() {
-
         toast = new Toast(context);
         toast.setView(getToastLayout());
         toast.setDuration(duration);
+        int showGravity = gravity == Gravity.TOP || gravity == Gravity.BOTTOM ? gravity | Gravity.CENTER_VERTICAL : gravity;
+        int offsetY = gravity == Gravity.TOP || gravity == Gravity.BOTTOM ? DEFAULT_OFFSET : 0;
+        toast.setGravity(showGravity, 0, offsetY);
         toast.show();
 
         if (isAnimation) {
@@ -521,11 +580,16 @@ public class StyleableToast implements OnToastFinished {
     }
 
 
-    public static StyleableToast makeText(Context context, CharSequence text, int duration, int style) {
-
-        StyleableToast styleableToast = new StyleableToast(context, text.toString(), duration, style);
-
+    public static StyleableToast makeText(Context context, CharSequence text,
+                                          @DrawableRes int drawable, @Duration int duration) {
+        StyleableToast styleableToast = new StyleableToast(context, text.toString(), duration);
+        styleableToast.setIcon(drawable);
         return styleableToast;
+    }
+
+    public static StyleableToast makeText(Context context, CharSequence text,
+                                          @Duration int duration) {
+        return new StyleableToast(context, text.toString(), duration);
     }
 
     public static final class Builder {
@@ -676,6 +740,7 @@ public class StyleableToast implements OnToastFinished {
 
         /**
          * Build and returns the configured instance
+         *
          * @return The configured {@link StyleableToast} instance.
          */
         public StyleableToast build() {
@@ -691,4 +756,18 @@ public class StyleableToast implements OnToastFinished {
 
     }
 
+    /**
+     * 持续时间<p/>
+     * 目前仅提供{@link Toast#LENGTH_SHORT}和{@link Toast#LENGTH_LONG}两种，与{@link Toast#LENGTH_SHORT}和{@link
+     * Toast#LENGTH_SHORT}对应
+     *
+     * @author chenchong
+     *         2017/4/10
+     *         下午2:48
+     */
+
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef({Toast.LENGTH_SHORT, Toast.LENGTH_LONG})
+    public @interface Duration {
+    }
 }

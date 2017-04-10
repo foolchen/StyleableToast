@@ -1,6 +1,5 @@
 package com.muddzdev.styleabletoastlibrary;
 
-
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Color;
@@ -8,7 +7,12 @@ import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
 import android.os.Build;
-import android.support.annotation.*;
+import android.support.annotation.ColorInt;
+import android.support.annotation.DrawableRes;
+import android.support.annotation.IntDef;
+import android.support.annotation.NonNull;
+import android.support.annotation.StringRes;
+import android.support.annotation.StyleRes;
 import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.View;
@@ -20,7 +24,6 @@ import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
-
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
@@ -273,7 +276,11 @@ public class StyleableToast implements OnToastFinished {
 
         RelativeLayout toastLayout = new RelativeLayout(context);
         toastLayout.setPadding(horizontalPadding, verticalPadding, horizontalPadding, verticalPadding);
-        toastLayout.setBackground(getToastShape());
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+          toastLayout.setBackground(getToastShape());
+        } else {
+          toastLayout.setBackgroundDrawable(getToastShape());
+        }
 
         //toastLayout.setGravity(Gravity.CENTER);
 

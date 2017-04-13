@@ -4,7 +4,6 @@ import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Color;
 import android.graphics.Typeface;
-import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
 import android.os.Build;
 import android.support.annotation.ColorInt;
@@ -21,6 +20,7 @@ import android.view.animation.Animation;
 import android.view.animation.LinearInterpolator;
 import android.view.animation.RotateAnimation;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -275,6 +275,7 @@ public class StyleableToast implements OnToastFinished {
         int verticalPadding = (int) getTypedValueInDP(context, DEFAULT_VERTICAL_PADDING);
 
         RelativeLayout toastLayout = new RelativeLayout(context);
+        toastLayout.setGravity(Gravity.CENTER);
         toastLayout.setPadding(horizontalPadding, verticalPadding, horizontalPadding, verticalPadding);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
           toastLayout.setBackground(getToastShape());
@@ -282,19 +283,19 @@ public class StyleableToast implements OnToastFinished {
           toastLayout.setBackgroundDrawable(getToastShape());
         }
 
-        //toastLayout.setGravity(Gravity.CENTER);
+        // 由于直接为toastLayout设置宽高属性并不会生效，故此处添加一个空白View用于占位和填充宽度
+        LinearLayout container = new LinearLayout(context);
+        container.setOrientation(LinearLayout.HORIZONTAL);
+        container.setGravity(Gravity.CENTER);
+        RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(getWidth(),
+            ViewGroup.LayoutParams.WRAP_CONTENT);
+        toastLayout.addView(container,layoutParams);
 
         if (drawable > 0) {
-            toastLayout.addView(getIcon());
+            container.addView(getIcon());
             toastLayout.setPadding(0, verticalPadding, 0, verticalPadding);
         }
-        toastLayout.addView(getTextView());
-
-        toastLayout.setLayoutParams(new ViewGroup.LayoutParams(getWidth(), ViewGroup.LayoutParams.WRAP_CONTENT));
-
-        /*if (minHeight != DEFAULT_MIN_HEIGHT) {
-            toastLayout.setMinimumHeight(getMinHeight());
-        }*/
+        container.addView(getTextView());
 
         return toastLayout;
     }
@@ -396,33 +397,12 @@ public class StyleableToast implements OnToastFinished {
         textView.setTextColor(getTextColor());
         textView.setTypeface(getTypeface());
 
-        if (drawable > 0) {
-            int iconWidth = 0;
-            ImageView icon = getIcon();
-            if (icon != null) {
-                Drawable drawable = icon.getDrawable();
-                if (drawable != null) {
-                    iconWidth = drawable.getIntrinsicWidth();
-                }
-            }
-            //previous: 18x2  + 8
-            int leftPadding = iconWidth == 0 ? (int) getTypedValueInDP(context, 18 * 2 + 5) : (int) getTypedValueInDP(context, 5);
-            int rightPadding = (int) getTypedValueInDP(context, 22);
-
-            RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-            if (icon == null) {
-                layoutParams.addRule(RelativeLayout.CENTER_IN_PARENT);
-            } else {
-                layoutParams.addRule(RelativeLayout.RIGHT_OF, icon.getId());
-                layoutParams.addRule(RelativeLayout.CENTER_VERTICAL);
-            }
-
-            textView.setLayoutParams(layoutParams);
-
-            //Make space between icon and textview / textview and right edge of the toast
-            textView.setPadding(leftPadding, 0, rightPadding, 0);
-        }
-
+        //previous: 18x2  + 8
+        int leftPadding = drawable > 0 ? (int) getTypedValueInDP(context, 5)
+            : (int) getTypedValueInDP(context, 22);
+        int rightPadding = (int) getTypedValueInDP(context, 22);
+        //Make space between icon and textview / textview and right edge of the toast
+        textView.setPadding(leftPadding, 0, rightPadding, 0);
         return textView;
     }
 
